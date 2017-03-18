@@ -28,10 +28,8 @@ import org.json.JSONObject;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 
-import message.Message;
 import post.Sort;
 import post.Post;
-import user.Location;
 import user.User;
 import user.UserImage;
 
