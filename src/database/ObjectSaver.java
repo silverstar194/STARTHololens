@@ -51,16 +51,9 @@ import user.User;
  * @author Admin
  *
  */
-public class ObjectBuilder {
-
-	private final String id;
-
-
-	public ObjectBuilder(String id){
-		this.id = id;
-	}
-
-
+public class ObjectSaver {
+	
+	
 	public User getUser() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		DataBaseDriver dataBase = new DataBaseDriver();
 		Connection dataBaseConn = dataBase.getConnection();
@@ -92,6 +85,5 @@ public class ObjectBuilder {
 
 		return exportUser;
 	}
-	
 
 }

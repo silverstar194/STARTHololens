@@ -18,8 +18,8 @@ import org.json.JSONObject;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 
+import database.ObjectBuilder;
 import user.User;
-import user.UserImage;
 
 import  javax.ws.rs.QueryParam;
 
@@ -58,45 +58,33 @@ public class Endpoint {
 	 * @throws IllegalAccessException the illegal access exception
 	 * @throws ClassNotFoundException the class not found exception
 	 */
-	@GET
+	@POST
 	@Path("/login")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response userLogin(@QueryParam("userName") String userName, @QueryParam("password") String password) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public Response userLogin(@QueryParam("userID") String userID, @QueryParam("password") String password) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 
-		if(userName != null && password != null){
-
-			User newUser = new User(User.getUserID(userName));
-	
-			if(newUser.verifyPassword(password)){
-				String json = newUser.getUserInfo();
-
-				System.out.println("=====SERVED JSON TO USER=====");
-				return Response.status(200).entity(json).build();
-			}else{
-				System.out.println("====Password ERROR=====");
-				return Response.status(400).entity("{\"Error\":\"Password Incorret\"}").build();
-			}
-
+		if(userID == null || password == null){
+			System.out.println("=====userID ERROR=====");
+			return Response.status(400).entity("{\"Error\":\"Provide email and password\"}").build();
 		}
 
-		System.out.println("=====userID ERROR=====");
-		return Response.status(400).entity("{\"Error\":\"Provide userID\"}").build();
+		User user = new ObjectBuilder(userID).getUser();
 
-	}  
+		if(user.verifyPassword(password)){
+			System.out.println("=====SERVED JSON TO USER=====");
+			return Response.status(200).build();
+		}else{
+			System.out.println("====Password ERROR=====");
+			return Response.status(400).entity("{\"Error\":\"Password Incorret\"}").build();
+		}
+	}
 
 
 	/**
 	 * Allows generation of new users which are added to MySQL database.
 	 *
-	 * @param firstName: first name of user
-	 * @param lastName: last name of user
-	 * @param latitude: latitude of user
-	 * @param longitude: longitude of user
 	 * @param email: email of user
 	 * @param password: user password (SHA-256 Hashed and Salted)
-	 * @param userName: username
-	 * @param work: place of work for user
-	 * @return JSON output with userID
 	 * @throws InstantiationException the instantiation exception
 	 * @throws IllegalAccessException the illegal access exception
 	 * @throws ClassNotFoundException the class not found exception
@@ -104,144 +92,132 @@ public class Endpoint {
 	 * @throws UnirestException 
 	 * @throws CloneNotSupportedException 
 	 */
-	@GET
+	@POST
 	@Path("/newuser")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response newUser(@QueryParam("email") String email,  
-			@QueryParam("password") String password) throws InstantiationException, IllegalAccessException, ClassNotFoundException, CloneNotSupportedException, IOException{
-		try{
-			if(email != null && password != null) {
-				
-				User newUser = new User(email, password);
+	public Response newUser(@QueryParam("userID") String userID, @QueryParam("password") String password) throws InstantiationException, IllegalAccessException, ClassNotFoundException, CloneNotSupportedException, IOException{
 
-				newUser.saveNewUserToDatabase();
-
-				System.out.println("=====SERVED JSON TO USER=====");
-				return Response.status(200).entity("{\"Message\":\"User Added to Database\", \"userID\":\""+newUser.getUserID()+"\"}").build();
-			}
-
-		}catch(com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException e){
-			System.out.println("=====DUPLICATE USERNAME=====");
-			
-			return Response.status(400).entity("{\"Error\":\"Duplicate Username\"}").build();
-
-		} catch(SQLException e){
-			System.out.println("=====General Error Adding New User to Database=====");
-			e.printStackTrace();
-			return Response.status(400).entity("{\"Error\":\"General Error Adding User to Database\"}").build();
+		if(userID == null || password == null) {
+			return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
 		}
 
-		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
-	}   
+		try{
+			String passHash, String emailPin, String userID
 
-	/**
-	 * Retrieves user from database based on ID
-	 *
-	 * @param userID the user id
-	 * @param password: user password (SHA-256 Hashed and Salted)
-	 * @return JSON output of user info.
-	 */
-	@GET
-	@Path("/getuser")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response getUser(@QueryParam("userID") String userID){
-
-		if(userID != null){
-
-			User newUser = new User(userID);
-
-			String json = newUser.getUserInfo();
+			User newUser = new User(password,"placeholder pin" ,userID);
+			newUser.saveNewUserToDatabase();
 
 			System.out.println("=====SERVED JSON TO USER=====");
-			return Response.status(200).entity(json).build();
-
+			return Response.status(200).entity("{\"Message\":\"User Added to Database\", \"userID\":\""+newUser.getUserID()+"\"}").build();
 		}
 
-		System.out.println("=====userID ERROR=====");
-		return Response.status(400).entity("{\"Error\":\"Provide userID\"}").build();
+	}catch(com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException e){
+		System.out.println("=====DUPLICATE USERNAME=====");
 
-	} 
-	
-	 /* Allows updates to user password.
-	 *
-	 * @param userID: userID
-	 * @param firstName: first name of user
-	 * @param lastName: last name of user
-	 * @param latitude: user latitude
-	 * @param longitude: user longitude
-	 * @param email: user email
-	 * @param password: user password (SHA-256 Hashed and Salted)
-	 * @param userName: username
-	 * @param work: user place of work
-	 * @return confirms user was updated
-	 * @throws InstantiationException the instantiation exception
-	 * @throws IllegalAccessException the illegal access exception
-	 * @throws ClassNotFoundException the class not found exception
-	 */
-	@GET
-	@Path("/updatepassword")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response updateLocation(@QueryParam("userID") String userID, @QueryParam("passwordold") String passwordOld, @QueryParam("passwordnew") String passwordNew) throws InstantiationException, IllegalAccessException, ClassNotFoundException  {
-		try{
-			if(userID != null && passwordOld != null && passwordNew != null) {
+		return Response.status(400).entity("{\"Error\":\"Duplicate Username\"}").build();
 
-				User newUser = new User(userID);
-				if(newUser.verifyPassword(passwordOld)){
-					newUser.setpassword(passwordNew);
-					newUser.update();
-
-					System.out.println("=====SERVED JSON TO USER=====");
-					return Response.status(200).entity("{\"Message\":\"User Password Updated in Database\", \"userID\":\""+newUser.getUserID()+"\"}").build();
-
-				}
-				return Response.status(400).entity("{\"Error\":\"Password or Username Incorrect\"}").build();
-
-			}	
-		} catch(SQLException e){
-			System.out.println("=====General Error Updating User=====");
-			e.printStackTrace();
-			return Response.status(400).entity("{\"Error\":\"General Error Adding User to Database\"}").build();
-		}
-
-		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
-	}   
-	
-	/**
-	 * Delete user from database.
-	 *
-	 * @param userID: user id
-	 * @param password: user password (SHA-256 Hashed and Salted)
-	 * @return Confirms user was deleted from database
-	 */
-	@GET
-	@Path("/deleteuser")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response deleteUser(@QueryParam("userID") String userID, @QueryParam("password") String password){
-
-		if(userID != null && password != null){
-			User newUser = new User(userID);
-
-			if(newUser.verifyPassword(password)){
-				try {
-					newUser.deleteUser();
-
-					System.out.println("=====SERVED JSON TO USER=====");
-					return Response.status(200).entity("{\"Message\":\"User Deleted from Database\", \"userID\":\""+newUser.getUserID()+"\"}").build();
-
-				} catch (Exception e) {
-					System.out.println("=====ERROR DELETING USER=====");
-					e.printStackTrace();
-					return Response.status(200).entity("{\"Error\":\"General Error Deleting User\"}").build();
-				}
-
-			}
-		}
-		return Response.status(200).entity("{\"Error\":\"Provide userID and password\"}").build();
-
+	} catch(SQLException e){
+		System.out.println("=====General Error Adding New User to Database=====");
+		e.printStackTrace();
+		return Response.status(400).entity("{\"Error\":\"General Error Adding User to Database\"}").build();
 	}
 
 
-	
+}   
+
+/**
+ * Retrieves user from database based on ID
+ *
+ * @param userID the user id
+ * @param password: user password (SHA-256 Hashed and Salted)
+ * @return JSON output of user info.
+ */
+@POST
+@Path("/getuser")
+@Produces(MediaType.TEXT_PLAIN)
+public Response getUser(@QueryParam("userID") String userID){
+
+	if(userID != null){
+
+		User newUser = new User(userID);
+
+		String json = newUser.getUserInfo();
+
+		System.out.println("=====SERVED JSON TO USER=====");
+		return Response.status(200).entity(json).build();
+
+	}
+
+	System.out.println("=====userID ERROR=====");
+	return Response.status(400).entity("{\"Error\":\"Provide userID\"}").build();
+
+} 
+
+/**
+ * Allows users to login with username and password.
+ * @param userName: username
+ * @param password: user password (SHA-256 Hashed and Salted)
+ * @return JSON output with userID
+ * @throws SQLException 
+ * @throws InstantiationException the instantiation exception
+ * @throws IllegalAccessException the illegal access exception
+ * @throws ClassNotFoundException the class not found exception
+ */
+@POST
+@Path("/verifypin")
+@Produces(MediaType.TEXT_PLAIN)
+public Response verifyPin(@QueryParam("pin") String pin,@QueryParam("username") String userName) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+
+	if(pin == null || userName == null){
+		System.out.println("=====userID ERROR=====");
+		return Response.status(400).entity("{\"Error\":\"Provide PIN\"}").build();
+	}
+
+	User newUser = new User(User.getUserID(userName));
+
+	if(newUser.verifyPin(pin)){
+		String json = newUser.getUserInfo();
+
+		System.out.println("=====SERVED JSON TO USER=====");
+		return Response.status(200).entity(json).build();
+	}else{
+		System.out.println("====Password ERROR=====");
+		return Response.status(400).entity("{\"Error\":\"Password Incorret\"}").build();
+	}
+
+}
+
+
+//////////////////////////START OF DATA CALLS /////////////////////////////
+
+/**
+ * Retrieves user from database based on ID
+ *
+ * @param userID the user id
+ * @param password: user password (SHA-256 Hashed and Salted)
+ * @return JSON output of user info.
+ */
+@POST
+@Path("/getbucketname")
+@Produces(MediaType.TEXT_PLAIN)
+public Response getBucketName(@QueryParam("userID") String userID){
+
+	if(userID != null){
+
+		User newUser = new User(userID);
+
+		String json = newUser.getUserInfo();
+
+		System.out.println("=====SERVED JSON TO USER=====");
+		return Response.status(200).entity(json).build();
+
+	}
+
+	System.out.println("=====userID ERROR=====");
+	return Response.status(400).entity("{\"Error\":\"Provide userID\"}").build();
+
+}
+
 
 
 }
