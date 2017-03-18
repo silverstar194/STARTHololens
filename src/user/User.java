@@ -14,9 +14,9 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.math.*;
-import database.DataBase;
-import message.Message;
-import post.Post;
+import database.DataBaseDriver;
+import database.ObjectBuilder;
+
 
 
 /**
@@ -30,8 +30,6 @@ import post.Post;
 
 public class User {
 
-	static final int MAX_SPAM_COUNT=3;
-
 	/** The user id. */
 	//generated server side
 	private String userID;
@@ -40,43 +38,37 @@ public class User {
 	private String email;
 
 	/** The password. */
-	private String password;
+	private String passHash;
 
-	/** The user name. */
-	private String userName;
+	/** The email pin. */
+	private String emailPin;
+
+
 
 	/**
 	 * Instantiates a new user.
 	 *
-	 * @param firstName: user first name
-	 * @param lastName: user last name
-	 * @param latitude: user latitude
-	 * @param longitude: user longitude
 	 * @param email: user email
 	 * @param password: user password
-	 * @param userName: user name
-	 * @param work: user place of work
 	 * @throws SQLException 
 	 * @throws ClassNotFoundException 
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public User(String firstName, String lastName, double latitude, double longitude, 
-			String email, String password, String userName, String bio) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public User(String email, String password) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 
-		if (bio.contains("'") || email.contains("'")) 
+		//sanitize for sql
+		if (email.contains("'") || password.contains("'")) 
 		{
-			bio = bio.replace("'", "''");
 			email = email.replace("'", "''");
+			password = password.replace("'", "''");
 		}
 
 		this.userID = idGenerator();
 		this.email = email;
-		this.password = hashPassword(password+this.userID);
-		this.userName = userName;
+		this.passHash = hashPassword(passHash+this.userID);
 
 		System.out.println("=====Generated New User=====");
-
 	}
 
 	/**
@@ -86,42 +78,8 @@ public class User {
 	 * @throws SQLException 
 	 */
 	public User(String id){
-		DataBase dataBase = new DataBase();
-		Connection dataBaseConn = null;
-		try {
-			dataBaseConn = dataBase.getConnection();
-
-
-			String command ="SELECT * FROM User WHERE userID='"+id+"'";
-
-			ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
-			while(rs.next()){
-				this.userID = rs.getString("userID");
-				this.email = rs.getString("email");
-				this.password = rs.getString("password");
-				this.userName = rs.getString("userName");
-			}
-
-			System.out.println("=====USER CREATED FROM DATABASE=====");
-
-		} catch (Exception e) {
-			System.out.println("=====ERROR GETTING USER FROM DATABASE=====");
-			e.printStackTrace();
-		}finally{
-			try {
-				dataBaseConn.close();
-			} catch (SQLException e) {
-				System.out.println("CANNOT CLOSE MYSQL CONNECTION");
-				e.printStackTrace();
-			}
-		}
-	}
-
-	/**
-	 * Blank Constructor
-	 */
-	public User(){
-
+		ObjectBuilder fetchFromDB = new ObjectBuilder(id);
+		return fetchFromDB.getUser();
 	}
 
 
@@ -140,18 +98,8 @@ public class User {
 	 * @return the password
 	 */
 	public String getpassword(){
-		return this.password;
+		return this.passHash;
 	}
-
-	/**
-	 * Gets the user name.
-	 *
-	 * @return the user name
-	 */
-	public String getuserName(){
-		return this.userName;
-	}
-
 
 
 	/**
@@ -183,16 +131,7 @@ public class User {
 	 * @param password the new password
 	 */
 	public void setpassword(String password){
-		this.password = hashPassword(password+this.userID);
-	}
-
-	/**
-	 * Sets the user name.
-	 *
-	 * @param userName the new user name
-	 */
-	public void setuserName(String userName){
-		this.userName = userName;
+		this.passHash = hashPassword(password+this.userID);
 	}
 
 
@@ -205,7 +144,7 @@ public class User {
 	 * @throws ClassNotFoundException the class not found exception
 	 */
 	public void saveNewUserToDatabase() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
-		DataBase dataBase = new DataBase();
+		DataBaseDriver dataBase = new DataBaseDriver();
 
 		Connection dataBaseConn = dataBase.getConnection();
 
@@ -214,8 +153,8 @@ public class User {
 				+ "VALUES"
 				+ "('"+this.userID+"','"+this.firstName+"','"+this.lastName+"','"+this.email+"','"+this.password+"','"+this.userName+"','"+this.bio+"');";
 
-	
-		
+
+
 		String commandUserMap = "INSERT INTO `electro956_db`.`UserMap` (`userName`, `userID`) VALUES ('"+this.userName+"', '"+this.userID+"');";
 
 		dataBase.executeUpdate(dataBaseConn, command);
@@ -235,7 +174,7 @@ public class User {
 	 * @throws ClassNotFoundException the class not found exception
 	 */
 	public void update() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
-		DataBase dataBase = new DataBase();
+		DataBaseDriver dataBase = new DataBaseDriver();
 
 		Connection dataBaseConn = dataBase.getConnection();
 
@@ -248,7 +187,6 @@ public class User {
 		dataBase.executeUpdate(dataBaseConn, command);
 		dataBase.executeUpdate(dataBaseConn, commandUserMap);
 
-		this.lastLocation.updateUser();
 
 		System.out.println("=====USER UPDATED IN DATABASE=====");
 
@@ -302,7 +240,7 @@ public class User {
 	 */
 	public void deleteUser() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 
-		DataBase dataBase = new DataBase();
+		DataBaseDriver dataBase = new DataBaseDriver();
 
 		Connection dataBaseConn = dataBase.getConnection();
 
@@ -353,8 +291,6 @@ public class User {
 		}
 
 		return null;
-
-
 	}
 
 	/**
@@ -365,7 +301,7 @@ public class User {
 	 */public static String getUserID(String userName) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		 String userIDReturn=null;
 
-		 DataBase dataBase = new DataBase();
+		 DataBaseDriver dataBase = new DataBaseDriver();
 
 		 Connection dataBaseConn = dataBase.getConnection();
 		 try{
@@ -387,7 +323,7 @@ public class User {
 			 }
 		 }
 
-		 System.out.println("=====USERID FETCHED FROM DATABASE=====");
+		 System.out.println("=====USER ID FETCHED FROM DATABASE=====");
 		 return userIDReturn;
 
 	 }
@@ -401,7 +337,7 @@ public class User {
 	  * @throws ClassNotFoundException the class not found exception
 	  */
 	 public void updateUserImageInDatabase(UserImage userImageSmall, UserImage userImageLarge) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
-		 DataBase dataBase = new DataBase();
+		 DataBaseDriver dataBase = new DataBaseDriver();
 
 		 Connection dataBaseConn = dataBase.getConnection();
 
@@ -426,7 +362,7 @@ public class User {
 	  * @throws ClassNotFoundException the class not found exception
 	  */
 	 public void saveUserImageToDatabase(UserImage userImageSmall, UserImage userImageLarge) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
-		 DataBase dataBase = new DataBase();
+		 DataBaseDriver dataBase = new DataBaseDriver();
 
 		 Connection dataBaseConn = dataBase.getConnection();
 
@@ -456,12 +392,12 @@ public class User {
 	 public Map<String, String> getUserImageFromDatabase() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		 Map<String, String> picArray = new HashMap();
 
-		 DataBase dataBase = new DataBase();
+		 DataBaseDriver dataBase = new DataBaseDriver();
 
 		 Connection dataBaseConn = dataBase.getConnection();
 
 		 String command ="SELECT * FROM `electro956_db`.`UserImage` WHERE userID='"+this.userID+"';";
-		 
+
 
 
 		 ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
@@ -474,11 +410,10 @@ public class User {
 			 picArray.put("userImageLarge", imageBase64Large);
 
 
-		 System.out.println("=====USER IMAGE FETCHED FROM DATABASE=====");
-
+			 System.out.println("=====USER IMAGE FETCHED FROM DATABASE=====");
+		 }
 		 return picArray;
 	 }
-
 
 
 	 /**

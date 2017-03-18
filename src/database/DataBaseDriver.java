@@ -39,38 +39,7 @@ import java.util.Properties;
  * 
  * java.net.ConnectException: Connection refused
  */
-public class DataBase {
-
-	/** The name of the MySQL account to use (or empty for anonymous) */
-	private final String userName = "electro2543";
-
-	/** The password for the MySQL account (or empty for anonymous) */
-	private final String password = "BgWf4TCBR";
-
-	/** The name of the computer running MySQL */
-	private final String serverName = "localhost";
-
-	/** The port of the MySQL server (default is 3306) */
-	private final int portNumber = 3306;
-
-	/** The name of the database we are testing with (this default is installed with MySQL) */
-	private final String dbName = "electro956_db";
-
-//	/** The name of the MySQL account to use (or empty for anonymous) */
-//	private final String userName = "root";
-//
-//	/** The password for the MySQL account (or empty for anonymous) */
-//	private final String password = "";
-//
-//	/** The name of the computer running MySQL */
-//	private final String serverName = "localhost";
-//
-//	/** The port of the MySQL server (default is 3306) */
-//	private final int portNumber = 3306;
-//
-//	/** The name of the database we are testing with (this default is installed with MySQL) */
-//	private final String dbName = "l";
-
+public class DataBaseDriver {
 
 	/**
 	 * Get a new database connection
@@ -86,11 +55,11 @@ public class DataBase {
 		Class.forName(driver).newInstance();
 		Connection conn = null;
 		Properties connectionProps = new Properties();
-		connectionProps.put("user", this.userName);
-		connectionProps.put("password", this.password);
+		connectionProps.put("user", Config.userName);
+		connectionProps.put("password", Config.password);
 
 		conn = DriverManager.getConnection("jdbc:mysql://"
-				+ this.serverName + ":" + this.portNumber + "/" + this.dbName,
+				+ Config.serverName + ":" + Config.portNumber + "/" + Config.dbName,
 				connectionProps);
 
 		return conn;
