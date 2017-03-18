@@ -69,11 +69,12 @@ public class ObjectBuilder {
 			dataBaseConn = dataBase.getConnection();
 
 
-			String command ="SELECT * FROM user WHERE userID='"+this.id+"'";
+			String command ="SELECT * FROM `user` WHERE userID='"+this.id+"'";
 
+			System.out.println(command);
 			ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
 			while(rs.next()){
-				exportUser = new User(rs.getString("email"), rs.getString("passHash"), rs.getString("emailPin"), id);
+				exportUser = new User(rs.getString("passHash"),"PLACEHOLDER", this.id);
 			}
 
 			System.out.println("=====USER CREATED FROM DATABASE=====");

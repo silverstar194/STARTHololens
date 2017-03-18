@@ -58,9 +58,9 @@ public class User {
 	public User(String password, String emailPin, String userID) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 
 		//sanitize for sql
-		if (passHash.contains("'")) 
+		if (password.contains("'")) 
 		{
-			passHash = passHash.replace("'", "''");
+			password = password.replace("'", "''");
 		}
 		
 		this.userID = idGenerator();
@@ -102,6 +102,16 @@ public class User {
 	public String getUserID(){
 		return this.userID;
 	}
+	
+	/**
+	 * Gets the email pin.
+	 *
+	 * @return the user pin
+	 */
+	public String getEmailPin(){
+		return this.userID;
+	}
+
 
 
 	/**

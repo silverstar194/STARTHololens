@@ -52,27 +52,32 @@ import user.User;
  *
  */
 public class ObjectSaver {
-	
-	
-	public User getUser() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+
+	private User user;
+
+	public ObjectSaver(User user){
+		this.user = user;
+	}
+
+
+	public void saveUser() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		DataBaseDriver dataBase = new DataBaseDriver();
 		Connection dataBaseConn = dataBase.getConnection();
-		User exportUser = null;
+
 		try {
 			dataBaseConn = dataBase.getConnection();
 
+			String command = "INSERT `"+Config.dbName+"`.`user` SET `userID` = '"+user.getUserID()+
+					"', `passHash` = '"+user.getpassword()+"', `salt` = '"+user.getUserID()+
+					"', `emailPin` = '"+user.getEmailPin()+"'";
 
-			String command ="SELECT * FROM user WHERE userID='"+this.id+"'";
+			System.out.println(command);
+			dataBase.executeUpdate(dataBaseConn, command);
 
-			ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
-			while(rs.next()){
-				exportUser = new User(rs.getString("email"), rs.getString("passHash"), rs.getString("emailPin"), id);
-			}
-
-			System.out.println("=====USER CREATED FROM DATABASE=====");
+			System.out.println("=====USER SAVE TO DATABASE=====");
 
 		} catch (Exception e) {
-			System.out.println("=====ERROR GETTING USER FROM DATABASE=====");
+			System.out.println("=====ERROR SAVING USER FROM DATABASE=====");
 			e.printStackTrace();
 		}finally{
 			try {
@@ -83,7 +88,6 @@ public class ObjectSaver {
 			}
 		}
 
-		return exportUser;
 	}
 
 }

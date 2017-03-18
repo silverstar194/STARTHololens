@@ -26,5 +26,6 @@
 	<classpathentry kind="lib" path="jsr311-api-1.1.1.jar"/>
 	<classpathentry kind="lib" path="mysql-connector-java-5.1.38-bin.jar"/>
 	<classpathentry kind="lib" path="org.json-20120521.jar"/>
+	<classpathentry kind="lib" path="commons-digester3-3.2.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
