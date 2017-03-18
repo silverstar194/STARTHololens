@@ -50,7 +50,7 @@ import  javax.ws.rs.QueryParam;
 public class Endpoint {
 
 	/**
-	 * Hello. "Hello World!" for Loop API
+	 * Hello. "Hello World!" for Halo API
 	 *
 	 * @return "Hello World!"
 	 */
@@ -124,29 +124,14 @@ public class Endpoint {
 	@GET
 	@Path("/newuser")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response newUser(@QueryParam("firstName") String firstName, 
-			@QueryParam("lastName") String lastName,  @QueryParam("latitude") String latitude,  
-			@QueryParam("longitude") String longitude, @QueryParam("email") String email,  
-			@QueryParam("password") String password, @QueryParam("userName") String userName,  
-			@QueryParam("bio") String bio, @QueryParam("gender") String gender) throws InstantiationException, IllegalAccessException, ClassNotFoundException, CloneNotSupportedException, IOException{
+	public Response newUser(@QueryParam("email") String email,  
+			@QueryParam("password") String password) throws InstantiationException, IllegalAccessException, ClassNotFoundException, CloneNotSupportedException, IOException{
 		try{
-			if(firstName != null && lastName != null && latitude != null && longitude 
-					!= null && email != null && password != null && userName != null && bio != null) {
+			if(email != null && password != null) {
 				
-				bio = "Welome to Loop! Set up your bio so others know who they are joining!";
-
-				User newUser = new User(firstName, lastName, Double.parseDouble(latitude),  Double.parseDouble(longitude), 
-						email, password, userName, bio);
+				User newUser = new User(email, password);
 
 				newUser.saveNewUserToDatabase();
-				UserImage newUserImageSmall = new UserImage(gender, "");
-				UserImage newUserImageLarge = new UserImage(newUserImageSmall);
-												
-				
-				newUserImageLarge.resizeImage(100, 100);
-				newUserImageSmall.resizeImage(50, 50);
-				
-				newUser.saveUserImageToDatabase(newUserImageSmall, newUserImageLarge);
 
 				System.out.println("=====SERVED JSON TO USER=====");
 				return Response.status(200).entity("{\"Message\":\"User Added to Database\", \"userID\":\""+newUser.getUserID()+"\"}").build();
@@ -193,108 +178,6 @@ public class Endpoint {
 		return Response.status(400).entity("{\"Error\":\"Provide userID\"}").build();
 
 	} 
-
-	/**
-	 * Allows updates to user.
-	 *
-	 * @param userID: userID
-	 * @param firstName: first name of user
-	 * @param lastName: last name of user
-	 * @param latitude: user latitude
-	 * @param longitude: user longitude
-	 * @param email: user email
-	 * @param password: user password (SHA-256 Hashed and Salted)
-	 * @param userName: username
-	 * @param work: user place of work
-	 * @return confirms user was updated
-	 * @throws InstantiationException the instantiation exception
-	 * @throws IllegalAccessException the illegal access exception
-	 * @throws ClassNotFoundException the class not found exception
-	 */
-	@GET
-	@Path("/updateuser")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response updateUser(@QueryParam("userID") String userID, @QueryParam("firstName") String firstName, 
-			@QueryParam("lastName") String lastName,  @QueryParam("latitude") String latitude,  
-			@QueryParam("longitude") String longitude, @QueryParam("email") String email,  
-			@QueryParam("password") String password, @QueryParam("userName") String userName,  
-			@QueryParam("bio") String bio) throws InstantiationException, IllegalAccessException, ClassNotFoundException  {
-		try{
-			if(userID != null && firstName != null && lastName != null && latitude != null && longitude 
-					!= null && email != null && password != null && userName != null && bio != null) {
-
-				User newUser = new User(userID);
-				if(newUser.verifyPassword(password)){
-					newUser.setfirstName(firstName);
-					newUser.setlastName(lastName);
-					newUser.setlastLocation(new Location(Double.parseDouble(latitude), Double.parseDouble(longitude), newUser.getUserID()));
-					newUser.setemail(email);
-					newUser.setpassword(password);
-					newUser.setuserName(userName);
-					newUser.setBio(bio);
-					newUser.update();
-
-					System.out.println("=====SERVED JSON TO USER=====");
-					return Response.status(200).entity("{\"Message\":\"User Updated in Database\", \"userID\":\""+newUser.getUserID()+"\"}").build();
-
-				}
-				return Response.status(400).entity("{\"Error\":\"Password or Username Incorrect\"}").build();
-
-			}	
-		} catch(SQLException e){
-			System.out.println("=====General Error Updating User=====");
-			e.printStackTrace();
-			return Response.status(400).entity("{\"Error\":\"General Error Adding User to Database\"}").build();
-		}
-
-		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
-	}   
-
-	/**
-	 * Allows updates to user.
-	 *
-	 * @param userID: userID
-	 * @param firstName: first name of user
-	 * @param lastName: last name of user
-	 * @param latitude: user latitude
-	 * @param longitude: user longitude
-	 * @param email: user email
-	 * @param password: user password (SHA-256 Hashed and Salted)
-	 * @param userName: username
-	 * @param work: user place of work
-	 * @return confirms user was updated
-	 * @throws InstantiationException the instantiation exception
-	 * @throws IllegalAccessException the illegal access exception
-	 * @throws ClassNotFoundException the class not found exception
-	 */
-	@GET
-	@Path("/updatelocation")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response updateLocation(@QueryParam("userID") String userID, @QueryParam("latitude") String latitude,  
-			@QueryParam("longitude") String longitude, @QueryParam("password") String password) throws InstantiationException, IllegalAccessException, ClassNotFoundException  {
-		try{
-			if(userID != null && latitude != null && longitude != null && password != null) {
-
-				User newUser = new User(userID);
-				if(newUser.verifyPassword(password)){
-					newUser.setlastLocation(new Location(Double.parseDouble(latitude), Double.parseDouble(longitude), newUser.getUserID()));
-					newUser.update();
-
-					System.out.println("=====SERVED JSON TO USER=====");
-					return Response.status(200).entity("{\"Message\":\"User Location Updated in Database\", \"userID\":\""+newUser.getUserID()+"\"}").build();
-
-				}
-				return Response.status(400).entity("{\"Error\":\"Password or Username Incorrect\"}").build();
-
-			}	
-		} catch(SQLException e){
-			System.out.println("=====General Error Updating User=====");
-			e.printStackTrace();
-			return Response.status(400).entity("{\"Error\":\"General Error Adding User to Database\"}").build();
-		}
-
-		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
-	}   
 	
 	 /* Allows updates to user password.
 	 *
@@ -427,31 +310,6 @@ public class Endpoint {
 		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
 	}
 
-	/**
-	 * Retrieves post from database based on postID
-	 *
-	 * @param postID the post id
-	 * @return JSON output of post info.
-	 */
-	@GET
-	@Path("/getpostbyid")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response getPostById(@QueryParam("postID") String postID){
-
-		if(postID != null){
-
-			Post newUser = new Post(postID);
-			String json = newUser.getPostInfo();
-
-			System.out.println("=====SERVED JSON TO USER=====");
-			return Response.status(200).entity(json).build();
-
-		}
-
-		System.out.println("=====userID ERROR=====");
-		return Response.status(400).entity("{\"Error\":\"Provide userID\"}").build();
-
-	} 
 
 	/**
 	 * Retrieves post from database based on userID
@@ -494,59 +352,8 @@ public class Endpoint {
 		return Response.status(400).entity("{\"Error\":\"Provide userID and Password\"}").build();
 
 	} 
-	/**
-	 * Gets the post from database.
-	 *
-	 * @param userID: user id from user that created post
-	 * @param password: user password (SHA-256 Hashed and Salted)
-	 * @param max: maximum number of returned posts
-	 * @param sortby: how posts are to sorted (Location, End Time, Start Time)
-	 * @return the post
-	 * @throws InstantiationException the instantiation exception
-	 * @throws IllegalAccessException the illegal access exception
-	 * @throws ClassNotFoundException the class not found exception
-	 * @throws NumberFormatException the number format exception
-	 */
-	@GET
-	@Path("/getposts")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response getPost(@QueryParam("userID") String userID, @QueryParam("password") String password, @QueryParam("max") int max, @QueryParam("sortby") String sortby) throws InstantiationException, IllegalAccessException, ClassNotFoundException, NumberFormatException{
-		try{
+	
 
-			if(userID != null && password != null && max > 0 && sortby != null){
-
-				User newUser = new User(userID);
-				if(newUser.verifyPassword(password)){
-					Sort posts = new Sort(100, sortby);
-					ArrayList<Post> sorted = posts.getSortedPosts();
-
-					//check that at least max was returned to prevent out-of-bounds error
-					if(sorted.size()<max){
-						max = sorted.size();
-					}
-
-					String output = "[";
-					for(int i=0; i<max; i++){
-						output+=sorted.get(i).getPostInfo()+",";
-					}
-
-					String json = output.substring(0,output.length()-1)+"]";
-
-					System.out.println("=====SERVED JSON TO USER=====");
-					return Response.status(200).entity(json).build();
-				}
-			} 
-		}catch(SQLException e){
-			System.out.println("=====General Error Updating User=====");
-			e.printStackTrace();
-			return Response.status(400).entity("{\"Error\":\"General Error Getting Posts From Database\"}").build();
-		}
-
-
-		System.out.println("=====userID OR password ERROR=====");
-		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
-
-	}
 
 	/**
 	 * Update post in database.
@@ -650,237 +457,7 @@ public class Endpoint {
 
 	}
 
-
-	/**
-	 * New message.
-	 *
-	 * @param userID: the user id of message sender
-	 * @param password: user password (SHA-256 Hashed and Salted)
-	 * @param content: the content of message
-	 * @param toID: the to id
-	 * @return Confirms message was created
-	 */
-	//message endpoints
-	@GET
-	@Path("/newmessage")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response newMessage(@QueryParam("userID") String userID, @QueryParam("password") String password, @QueryParam("content") String content, @QueryParam("toID") String toID, @QueryParam("postID") String postID){
-
-		if(userID != null && password != null && content != null && toID != null && postID != null){
-			User newUser = new User(userID);
-			Message newMessage = new Message(content, userID, toID, postID);
-
-			if(newUser.verifyPassword(password)){
-				try {
-					newMessage.saveMessageToDataBase();
-
-					System.out.println("=====SERVED JSON TO USER=====");
-					return Response.status(200).entity("{\"Message\":\"Message Posted to Database\", \"messageID\":\""+newMessage.getMessageID()+"\"}").build();
-
-				} catch (Exception e) {
-
-					System.out.println("=====ERROR SENDING MESSAGE TO DATABASE=====");
-					e.printStackTrace();
-					return Response.status(400).entity("{\"Error\":\"General Error\"}").build();
-				}
-
-			}
-		}
-		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
-
-	}
-
-	/**
-	 * Gets the message.
-	 *
-	 * @param userID: the user id
-	 * @param password: the password
-	 * @return the users message
-	 */
-	@GET
-	@Path("/getmessage")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response getMessage(@QueryParam("userID") String userID, @QueryParam("password") String password){
-
-		if(userID != null && password != null){
-
-			User newUser = new User(userID);
-			Message newBlankMessage = new Message();
-
-			if(newUser.verifyPassword(password)){
-				try {
-
-					ArrayList<Message> messages = newBlankMessage.getMessageByUser(newUser);
-
-					if(messages.size()==0){
-						return Response.status(200).entity("{\"Message\": \"No Messages\"}").build();
-					}
-
-					String output="[";
-					for(int i=0; i<messages.size(); i++){
-						output+=messages.get(i).getMessageInfo()+",";
-					}
-
-					String json = output.substring(0,output.length()-1)+"]";
-
-					System.out.println("=====SERVED JSON TO USER=====");
-					return Response.status(200).entity(json).build();
-
-				} catch (Exception e) {
-
-					System.out.println("=====ERROR SENDING MESSAGE TO DATABASE=====");
-					e.printStackTrace();
-					return Response.status(400).entity("{\"Error\":\"General Error\"}").build();
-				}
-
-			}
-		}
-		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
-
-	}
-	@GET
-	@Path("/getmessagepost")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response getMessagePost(@QueryParam("userID") String userID, @QueryParam("password") String password, @QueryParam("postID") String postID){
-
-		if(userID != null && password != null && postID != null){
-
-			User newUser = new User(userID);
-			Message newBlankMessage = new Message();
-
-			if(newUser.verifyPassword(password)){
-				try {
-
-					ArrayList<Message> messages = newBlankMessage.getMessageByUserAndPost(newUser, postID);
-
-					if(messages.size()==0){
-						return Response.status(200).entity("{\"Message\": \"No Messages\"}").build();
-					}
-
-					String output="[";
-					for(int i=0; i<messages.size(); i++){
-						output+=messages.get(i).getMessageInfo()+",";
-						if(messages.get(i).getViewed() != true && userID.equals(messages.get(i).getToID())){
-							messages.get(i).setViewed(true);
-							messages.get(i).update();
-						}
-					}
-
-					String json = output.substring(0,output.length()-1)+"]";
-
-					System.out.println("=====SERVED JSON TO USER=====");
-					return Response.status(200).entity(json).build();
-
-				} catch (Exception e) {
-
-					System.out.println("=====ERROR SENDING MESSAGE TO DATABASE=====");
-					e.printStackTrace();
-					return Response.status(400).entity("{\"Error\":\"General Error\"}").build();
-				}
-
-			}
-		}
-		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
-
-	}
-
-	@GET
-	@Path("/getmessagenewpost")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response getMessageNewPost(@QueryParam("userID") String userID, @QueryParam("password") String password, @QueryParam("postID") String postID, @QueryParam("fromID") String fromID){
-
-		if(userID != null && password != null && postID != null && fromID != null){
-
-			User newUser = new User(userID);
-			Message newBlankMessage = new Message();
-
-			if(newUser.verifyPassword(password)){
-				try {
-
-					ArrayList<Message> messages = newBlankMessage.getNewMessageByUserAndPost(newUser, postID, fromID);
-
-					if(messages.size()==0){
-						return Response.status(200).entity("{\"Message\": \"No Messages\"}").build();
-					}
-
-					String output="[";
-					for(int i=0; i<messages.size(); i++){
-						output+=messages.get(i).getMessageInfo()+",";
-						if(messages.get(i).getViewed() != true && userID.equals(messages.get(i).getToID())){
-							messages.get(i).setViewed(true);
-							messages.get(i).update();
-						}
-
-					}
-
-					String json = output.substring(0,output.length()-1)+"]";
-
-					System.out.println("=====SERVED JSON TO USER=====");
-					return Response.status(200).entity(json).build();
-
-				} catch (Exception e) {
-
-					System.out.println("=====ERROR SENDING MESSAGE TO DATABASE=====");
-					e.printStackTrace();
-					return Response.status(400).entity("{\"Error\":\"General Error\"}").build();
-				}
-
-			}
-		}
-		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
-
-	}
-
-	/**
-	 * Gets the new message.
-	 *
-	 * @param userID: the user id
-	 * @param password: user password (SHA-256 Hashed and Salted)
-	 * @return the new messages for the user
-	 */
-	@GET
-	@Path("/getnewmessage")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response getNewMessage(@QueryParam("userID") String userID, @QueryParam("password") String password){
-
-		if(userID != null && password != null){
-			User newUser = new User(userID);
-			Message newBlankMessage = new Message();
-
-			if(newUser.verifyPassword(password)){
-				try {
-
-					ArrayList<Message> messages = newBlankMessage.getNewMessageByUser(newUser);
-
-
-					if(messages.size() == 0){
-						return Response.status(200).entity("{\"Message:\" \"No Messages\"}").build();
-					}
-
-					String output="[";
-					for(int i=0; i<messages.size(); i++){
-						output+=messages.get(i).getMessageInfo()+",";
-
-					}
-
-					String json = output.substring(0,output.length()-1)+"}";
-
-					System.out.println("=====SERVED JSON TO USER=====");
-					return Response.status(200).entity(json).build();
-
-				} catch (Exception e) {
-					System.out.println("=====ERROR SENDING MESSAGE TO DATABASE=====");
-					e.printStackTrace();
-					return Response.status(400).entity("{\"Error\":\"General Error\"}").build();
-				}
-
-			}
-		}
-		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
-
-	}
-
-	/* Saves image to database.
+	/** Saves image to database.
 	 *
 	 * @param userID: the user id
 	 * @param password: user password (SHA-256 Hashed and Salted)
@@ -888,7 +465,7 @@ public class Endpoint {
 	 * @return the new messages for the user
 	 */
 	@POST
-	@Path("/saveimage")
+	@Path("/savedata")
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response setUserImage(@FormParam("userID") String userID, @FormParam("password") String password, @FormParam("image") String imageBase64) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 
@@ -896,14 +473,7 @@ public class Endpoint {
 			User newUser = new User(userID);
 
 			if(newUser.verifyPassword(password)){
-				UserImage newLarge = new UserImage(imageBase64);
-				UserImage newSmall = new UserImage(imageBase64);
-
-				newLarge.resizeImage(100, 100);
-				newSmall.resizeImage(50, 50);
-
-				newUser.saveUserImageToDatabase(newSmall, newLarge);
-
+				UserImage data = new UserImage(imageBase64);
 
 				System.out.println("=====SERVED JSON TO USER=====");
 				return Response.status(200).entity("{\"Message\":\"Image Saved to DataBase\"}").build();
@@ -913,6 +483,7 @@ public class Endpoint {
 		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
 
 	}
+	
 	/* Updates image in database.
 	 *
 	 * @param userID: the user id
@@ -929,13 +500,9 @@ public class Endpoint {
 			User newUser = new User(userID);
 
 			if(newUser.verifyPassword(password)){
-				UserImage newLarge = new UserImage(imageBase64);
-				UserImage newSmall = new UserImage(imageBase64);
+				UserImage image = new UserImage(imageBase64);
 
-				newLarge.resizeImage(100, 100);
-				newSmall.resizeImage(50, 50);
-
-				newUser.updateUserImageInDatabase(newSmall, newLarge);
+				newUser.updateUserImageInDatabase(image);
 
 			}else{
 
@@ -970,30 +537,6 @@ public class Endpoint {
 		}
 		return Response.status(400).entity("{\"Error\":\"Provide all parameters\"}").build();
 
-	}
-
-	/* Updates post as spam
-	 *
-	 * @param postID
-	 * @return verify message
-	 */
-	@GET
-	@Path("/reportspam")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response getRepostSpam(@QueryParam("postID") String postID) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-if(postID != null){
-		Post newPost = new Post(postID);
-		User newUser = new User(newPost.getUserId());
-		
-		newPost.addToSpamCount(1);
-		newUser.addToSpamCount(1);
-		newUser.update();
-		newPost.update();
-		
-
-			return Response.status(200).entity("{\"Message\": \"Spam Recorded\"}").build();
-}
-return Response.status(400).entity("{\"Error\": \"Provide all parameters\"}").build();
 	}
 
 	

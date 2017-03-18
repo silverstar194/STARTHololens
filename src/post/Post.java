@@ -28,7 +28,7 @@ import user.User;
 /**
  * Creates posts from Users and sends them to the database.
  */
-public class Post implements Comparable{
+public class Post {
 
 	
 	/** The title. */
@@ -37,43 +37,23 @@ public class Post implements Comparable{
 	/** The content. */
 	private String content;
 	
-	/** The location. */
-	private Location location;
-	
 	/** The time. */
 	private long time;
 	
 	/** The user id. */
 	private String userID;
 	
-	/** The post id. */
-	private String postID;
-	
-	/** The end time. */
-	private long endTime;
-
-	/** The user. */
-	private User user;
-	
 	private boolean deleted; // always false unless deleted
 	
-	/** The number spam reports. */
-	private int spamCount;
-
-	/** Is the post marked as spam */
-	private boolean spam;
 
 	/**
 	 * Instantiates a new post.
 	 *
 	 * @param title: the title
 	 * @param content: the content
-	 * @param latitude: the latitude of post
-	 * @param longitude: the longitude of post
 	 * @param userID: the user id
-	 * @param endTime: the expiration time
 	 */
-	public Post(String title, String content, double latitude, double longitude, String userID, long endTime, boolean deleted , int spamCount, boolean spam){
+	public Post(String title, String content, String userID, long endTime, boolean deleted){
 		if (content.contains("'") || title.contains("'")) 
 		{
 			content = content.replace("'", "''");
@@ -82,14 +62,9 @@ public class Post implements Comparable{
 		
 		this.title = title;
 		this.content = content;
-		this.postID = idGenerator();
-		this.location = new Location(latitude, longitude, this.postID);
 		this.userID = userID;
-		this.endTime = endTime;
 		this.time=System.currentTimeMillis();
 		this.deleted = deleted;
-		this.spamCount = spamCount;
-		this.spam = spam;
 
 	}
 
@@ -103,7 +78,7 @@ public class Post implements Comparable{
 	 * @param time: the time post was made
 	 * @param endTime: the expiration time
 	 */
-	public Post(String title, String content, String userID, String postID, long time, long endTime, boolean deleted, int spamCount, boolean spam){
+	public Post(String title, String content, String userID){
 		if (content.contains("'") || title.contains("'")) 
 		{
 			content = content.replace("'", "''");
@@ -111,15 +86,8 @@ public class Post implements Comparable{
 		}
 		this.title = title;
 		this.content = content;
-		this.postID = postID;
-		this.location = new Location(this);
 		this.userID = userID;
-		this.endTime = endTime;
-		this.time=time; 
-		this.user = new User(userID);
-		this.deleted = deleted;
-		this.spamCount = spamCount;
-		this.spam = spam;
+
 	}
 
 	/**
@@ -141,12 +109,6 @@ public class Post implements Comparable{
 				this.title = rs.getString("title");
 				this.content = rs.getString("content");
 				this.userID = rs.getString("userID");
-				this.postID = id;
-				this.location = new Location(this);
-				this.endTime = Long.parseLong(rs.getString("endTime"));
-				this.time = rs.getLong("time");
-				this.deleted = Boolean.parseBoolean(rs.getString("deleted"));
-				this.spamCount = Integer.parseInt(rs.getString("spamCount"));
 			}
 
 			System.out.println("=====USER CREATED FROM DATABASE=====");
@@ -180,15 +142,6 @@ public class Post implements Comparable{
 	//getters
 	public String getTitle(){
 		return this.title;
-	}
-	
-	/**
-	 * Gets the spam count.
-	 *
-	 * @return the spam count
-	 */
-	public int getSpamCount(){
-		return this.spamCount;
 	}
 
 	/**
@@ -273,15 +226,7 @@ public class Post implements Comparable{
 		
 		this.content = content;
 	}
-	
-	/**
-	 * Sets the location.
-	 *
-	 * @param location the new location
-	 */
-	public void setLocation(Location location){
-		this.location = location;
-	}
+
 
 	/**
 	 * Sets the time.
@@ -292,14 +237,7 @@ public class Post implements Comparable{
 		this.time = time;
 	}
 
-	/**
-	 * Sets the end time.
-	 *
-	 * @param endTme the new end time
-	 */
-	public void setEndTime(long endTme){
-		this.endTime = endTime;
-	}
+
 	
 	/**
 	 * Sets the post to deleted.
@@ -310,20 +248,7 @@ public class Post implements Comparable{
 		this.deleted = true;
 	}
 	
-	
-	/**
-	 * Sets the spam count.
-	 *
-	 * 
-	 */
-	public void addToSpamCount(int spamCount){
-		this.spamCount += spamCount;
-	}
-	
-	/** marks post as spam **/
-	public void spam(){
-		this.spam = true;
-	}
+
 
 	/**
 	 * Save new post to database.
@@ -451,11 +376,7 @@ public class Post implements Comparable{
 		userMap.put("content", contentNew);
 		userMap.put("time", ""+this.time);
 		userMap.put("userID", this.userID);
-		userMap.put("endTime", ""+this.endTime);
-		userMap.put("latitude", ""+this.location.getLatitude());
-		userMap.put("longitude", ""+this.location.getLongitude());
-		userMap.put("deleted", Boolean.toString(this.deleted));
-		userMap.put("spam", Boolean.toString(this.spam));
+
 		JSONObject json = new JSONObject(userMap);
 
 		System.out.println("=====USER CONVERTED TO JSON=====");
@@ -525,126 +446,4 @@ public class Post implements Comparable{
 		return count;
 	}
 	
-
-	//for sorting
-	/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	/*::                                                                         :*/
-	/*::  This routine calculates the distance between two points (given the     :*/
-	/*::  latitude/longitude of those points). It is being used to calculate     :*/
-	/*::  the distance between two locations using GeoDataSource (TM) prodducts  :*/
-	/*::                                                                         :*/
-	/*::  Definitions:                                                           :*/
-	/*::    South latitudes are negative, east longitudes are positive           :*/
-	/*::                                                                         :*/
-	/*::  Passed to function:                                                    :*/
-	/*::    lat1, lon1 = Latitude and Longitude of point 1 (in decimal degrees)  :*/
-	/*::    lat2, lon2 = Latitude and Longitude of point 2 (in decimal degrees)  :*/
-	/*::    unit = the unit you desire for results                               :*/
-	/*::           where: 'M' is statute miles (default)                         :*/
-	/*::                  'K' is kilometers                                      :*/
-	/*::                  'N' is nautical miles                                  :*/
-	/*::  Worldwide cities and other features databases with latitude longitude  :*/
-	/*::  are available at http://www.geodatasource.com                          :*/
-	/*::                                                                         :*/
-	/*::  For enquiries, please contact sales@geodatasource.com                  :*/
-	/*::                                                                         :*/
-	/*::  Official Web site: http://www.geodatasource.com                        :*/
-	/*::                                                                         :*/
-	/*::           GeoDataSource.com (C) All Rights Reserved 2015                :*/
-	/*::                                                                         :*/
-	/*::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-
-
-
-	/** The post list. */
-	@SuppressWarnings("rawtypes")
-	private List postList = new ArrayList<Post>(); 
-
-
-	/**
-	 * Distance from me.
-	 *
-	 * @param lat2 the lat2
-	 * @param lon2 the lon2
-	 * @return the double
-	 */
-	private Double distanceFromMe(double lat2, double lon2) {
-
-		Location currentLocation = this.user.getlastLocation();
-		double theta = currentLocation.getLongitude() - lon2;
-		double dist = Math.sin(deg2rad(currentLocation.getLatitude())) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(currentLocation.getLatitude())) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-		dist = Math.acos(dist);
-		dist = rad2deg(dist);
-		dist = dist * 60 * 1.1515;
-		dist = dist * 1.609344;
-
-		return dist;
-	}
-
-	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	/*::	This function converts decimal degrees to radians						 :*/
-	/**
-	 * Deg2rad.
-	 *
-	 * @param deg the deg
-	 * @return the double
-	 */
-	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	private static double deg2rad(double deg) {
-		return (deg * Math.PI / 180.0);
-	}
-
-	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	/*::	This function converts radians to decimal degrees						 :*/
-	/**
-	 * Rad2deg.
-	 *
-	 * @param rad the rad
-	 * @return the double
-	 */
-	/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
-	private static double rad2deg(double rad) {
-		return (rad * 180 / Math.PI);
-	}
-
-	/**
-	 * Sort by location.
-	 *
-	 * @return the list
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Sort> sortByLocation(){
-		Collections.sort(postList);
-		return this.postList;
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(Object o) {
-		if(o instanceof Post){
-			Post e = (Post)o;
-
-			if(Sort.getSortMethod().equals("location")){
-				
-				Double thisDistance = this.distanceFromMe(this.getLocation().getLatitude(), this.getLocation().getLongitude());
-				Double eDistance =  distanceFromMe(e.getLocation().getLatitude(), e.getLocation().getLongitude());
-				
-				return thisDistance.compareTo(eDistance);
-				
-		
-			} else if(Sort.getSortMethod().equals("starttime")){
-
-				return ((Long)e.getTime()).compareTo(this.time);
-				
-			} else if(Sort.getSortMethod().equals("endtime")){
-
-				return ((Long)e.getEndTime()).compareTo(this.endTime);
-			}
-		}
-		
-		
-		return 0;
-	}
 }

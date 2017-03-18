@@ -36,16 +36,6 @@ public class User {
 	//generated server side
 	private String userID;
 
-	/** The first name. */
-	//passed by app
-	private String firstName;
-
-	/** The last name. */
-	private String lastName;
-
-	/** The last location. */
-	private Location lastLocation;
-
 	/** The email. */
 	private String email;
 
@@ -54,17 +44,6 @@ public class User {
 
 	/** The user name. */
 	private String userName;
-
-	private String bio;
-
-	/** The number of new messages. */
-	private int messageCount;
-
-	/** The number of user posts. */
-	private int postCount;
-
-	/** The number spam reports. */
-	private int spamCount;
 
 	/**
 	 * Instantiates a new user.
@@ -92,18 +71,9 @@ public class User {
 		}
 
 		this.userID = idGenerator();
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.lastLocation = new Location(latitude, longitude, this.userID);
 		this.email = email;
 		this.password = hashPassword(password+this.userID);
 		this.userName = userName;
-		this.bio = bio;
-
-		Message newMessage = new Message();
-		this.messageCount = newMessage.getNewMessageCountByUser(this);
-		Post newPost = new Post();
-		this.postCount = newPost.getPostCountByUser(this);
 
 		System.out.println("=====Generated New User=====");
 
@@ -127,19 +97,9 @@ public class User {
 			ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
 			while(rs.next()){
 				this.userID = rs.getString("userID");
-				this.firstName = rs.getString("firstName");
-				this.lastName = rs.getString("lastName");
 				this.email = rs.getString("email");
-				this.lastLocation = new Location(this);
 				this.password = rs.getString("password");
 				this.userName = rs.getString("userName");
-				this.bio = rs.getString("bio").replace("'", "''");
-				this.spamCount = Integer.parseInt(rs.getString("spamCount"));
-
-				Message newMessage = new Message();
-				this.messageCount = newMessage.getNewMessageCountByUser(this);
-				Post newPost = new Post();
-				this.postCount = newPost.getPostCountByUser(this);
 			}
 
 			System.out.println("=====USER CREATED FROM DATABASE=====");
@@ -164,34 +124,6 @@ public class User {
 
 	}
 
-
-	/**
-	 * Gets the first name.
-	 *
-	 * @return the first name
-	 */
-	//getters
-	public String getfirstName(){
-		return this.firstName;
-	}
-
-	/**
-	 * Gets the last name.
-	 *
-	 * @return the last name
-	 */
-	public String getlastName(){
-		return this.lastName;
-	}
-
-	/**
-	 * Gets the last location.
-	 *
-	 * @return the last location
-	 */
-	public Location getlastLocation(){
-		return this.lastLocation;
-	}
 
 	/**
 	 * Gets the email.
@@ -220,14 +152,7 @@ public class User {
 		return this.userName;
 	}
 
-	/**
-	 * Gets the bio.
-	 *
-	 * @return the bio
-	 */
-	public String getBio(){
-		return this.bio;
-	}
+
 
 	/**
 	 * Gets the user id.
@@ -238,33 +163,6 @@ public class User {
 		return this.userID;
 	}
 
-	/**
-	 * Sets the first name.
-	 *
-	 * @param firstName the new first name
-	 */
-	//setters
-	public void setfirstName(String firstName){
-		this.firstName = firstName;
-	}
-
-	/**
-	 * Sets the last name.
-	 *
-	 * @param lastName the new last name
-	 */
-	public void setlastName(String lastName){
-		this.lastName = lastName;
-	}
-
-	/**
-	 * Sets the last location.
-	 *
-	 * @param lastLocation the new last location
-	 */
-	public void setlastLocation(Location lastLocation){
-		this.lastLocation = lastLocation;
-	}
 
 	/**
 	 * Sets the email.
@@ -297,31 +195,6 @@ public class User {
 		this.userName = userName;
 	}
 
-	/**
-	 * Sets the bio.
-	 *
-	 * @param bio the new bio
-	 */
-	public void setBio(String bio){
-		if (bio.contains("'")) 
-		{
-			bio = bio.replace("'", "''");
-		}
-		this.bio = bio;
-	}
-
-	/**
-	 * Adds one to the user's spam count
-	 * @throws SQLException 
-	 * @throws ClassNotFoundException 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
-	 */
-	public void addToSpamCount(int spamValue) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		this.spamCount +=spamValue;
-		this.update();
-	}
-
 
 	/**
 	 * Save new user to database.
@@ -348,7 +221,6 @@ public class User {
 		dataBase.executeUpdate(dataBaseConn, command);
 		dataBase.executeUpdate(dataBaseConn, commandUserMap);
 
-		this.lastLocation.saveNewUserLocationToDatabase();
 
 		System.out.println("=====USER SENT TO DATABASE=====");
 
@@ -600,9 +472,7 @@ public class User {
 
 			 picArray.put("userImageSmall", imageBase64Small);
 			 picArray.put("userImageLarge", imageBase64Large);
-			 picArray.put("firstName", this.firstName);
-			 picArray.put("lastName", this.lastName);
-		 }
+
 
 		 System.out.println("=====USER IMAGE FETCHED FROM DATABASE=====");
 
@@ -626,16 +496,4 @@ public class User {
 		 return false;
 	 }
 
-	 /**
-	  * Checks user is not spammy.
-	  *
-	  * @return true, if ok to pass
-	  */
-	 public boolean spamCheck(){
-
-		 if(this.spamCount<=MAX_SPAM_COUNT){
-			 return true;
-		 }
-		 return false;
-	 }
 }
