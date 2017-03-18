@@ -50,6 +50,51 @@ public class Endpoint {
 		System.out.println("=====SERVED JSON TO USER=====");
 		return Response.status(200).entity("{\"Hello World!\": \"The Loop API is working!\"}").build();
 	} 
+	
+	
+	/**
+	 * Allows users to login with username and password.
+	 * @param userName: username
+	 * @param password: user password (SHA-256 Hashed and Salted)
+	 * @return JSON output with userID
+	 * @throws SQLException 
+	 * @throws InstantiationException the instantiation exception
+	 * @throws IllegalAccessException the illegal access exception
+	 * @throws ClassNotFoundException the class not found exception
+	 * @throws JSONException 
+	 */
+	@POST
+	@Path("/getAllItems")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response getAllItems(String request) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException, JSONException{
+		System.out.println(request);
+		JSONObject jsonObject = new JSONObject(request);
+
+		String userID = jsonObject.getString("userID");
+		//google how to get auth token
+		String authToken = jsonObject.getString("");
+		//parse auth token
+
+		if(userID == null || authToken == null){
+			System.out.println("=====userID ERROR=====");
+			return Response.status(400).entity("{\"Error\":\"Provide email and token\"}").build();
+		}
+		// match auth token
+		// get bucket name from user
+		// fetch all bucket keys with bucket name
+		// iterate over bucket keys and fetch file
+		// create a new object of {file type, file} for each one
+		// json encode each one, add to a list
+		// serve list as response
+		
+		
+		// create auth token and store
+		System.out.println("=====SERVED JSON TO USER=====");
+		return Response.ok().build();
+			
+	}
+
+
 
 	/**
 	 * Allows users to login with username and password.
@@ -84,13 +129,16 @@ public class Endpoint {
 			return Response.serverError().build();
 		}
 
-		if(user.verifyPassword(password)){
-			System.out.println("=====SERVED JSON TO USER=====");
-			return Response.ok().build();
-		}else{
+		if(!user.verifyPassword(password)){
 			System.out.println("====Password ERROR=====");
 			return Response.status(400).entity("{\"Error\":\"Password Incorret\"}").build();
+			
 		}
+		
+		// create auth token and store
+		System.out.println("=====SERVED JSON TO USER=====");
+		return Response.ok().build();
+			
 	}
 
 
@@ -123,7 +171,8 @@ public class Endpoint {
 		try{
 
 			new ObjectSaver(new User(password,"placeholder pin" ,userID)).saveUser();
-
+			// create data keys and store
+			// create bucket and store
 			System.out.println("=====SERVED JSON TO USER=====");
 			return Response.status(200).entity("{\"Message\":\"User Added to Database\", \"userID\":\""+userID+"\"}").build();
 
@@ -139,8 +188,124 @@ public class Endpoint {
 			return Response.status(400).entity("{\"Error\":\"General Error Adding User to Database\"}").build();
 		}
 	}
+	
+	
+	/**
+	 * Allows generation of new users which are added to MySQL database.
+	 *
+	 * @throws InstantiationException the instantiation exception
+	 * @throws IllegalAccessException the illegal access exception
+	 * @throws ClassNotFoundException the class not found exception
+	 * @throws IOException 
+	 * @throws UnirestException 
+	 * @throws CloneNotSupportedException 
+	 * @throws JSONException 
+	 */
+	@POST
+	@Path("/uploadFile")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response uploadFile(String request) throws InstantiationException, IllegalAccessException, ClassNotFoundException, CloneNotSupportedException, IOException, JSONException{
 
+		System.out.println(request);
+		JSONObject jsonObject = new JSONObject(request);
 
+		String userID = jsonObject.getString("userID");
+		String fileData = jsonObject.getString("file");
+		String dataType = jsonObject.getString("dataType");
+		String description = jsonObject.getString("description");
+		
+		//google how to get auth token
+		String authToken = jsonObject.getString("");
+
+		if(userID == null || authToken == null || fileData == null || dataType == null || description == null){
+			System.out.println("=====userID ERROR=====");
+			return Response.status(400).entity("{\"Error\":\"Provide stuff\"}").build();
+		}
+		// match auth token
+		// get bucket name from user
+		// upload data using amazon client
+		// store returned key, bucket name, filetype, filedescription in db
+				
+		System.out.println("=====SERVED JSON TO USER=====");
+		return Response.ok().build();
+	}
+	
+	/**
+	 * Allows generation of new users which are added to MySQL database.
+	 *
+	 * @throws InstantiationException the instantiation exception
+	 * @throws IllegalAccessException the illegal access exception
+	 * @throws ClassNotFoundException the class not found exception
+	 * @throws IOException 
+	 * @throws UnirestException 
+	 * @throws CloneNotSupportedException 
+	 * @throws JSONException 
+	 */
+	@POST
+	@Path("/getFile")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response getFile(String request) throws InstantiationException, IllegalAccessException, ClassNotFoundException, CloneNotSupportedException, IOException, JSONException{
+
+		System.out.println(request);
+		JSONObject jsonObject = new JSONObject(request);
+
+		String userID = jsonObject.getString("userID");
+		String fileKey = jsonObject.getString("key");
+		
+		//google how to get auth token
+		String authToken = jsonObject.getString("");
+
+		if(userID == null || authToken == null || fileKey == null){
+			System.out.println("=====userID ERROR=====");
+			return Response.status(400).entity("{\"Error\":\"Provide stuff\"}").build();
+		}
+		// match auth token to see it's a logged in user
+		// get bucket name from user
+		// download data using amazon client with bucketname and key
+		// get file type using bucket key
+		// create a new object of {file type, file} and return
+				
+		System.out.println("=====SERVED JSON TO USER=====");
+		return Response.ok().build();
+	}
+
+	/**
+	 * Allows generation of new users which are added to MySQL database.
+	 *
+	 * @throws InstantiationException the instantiation exception
+	 * @throws IllegalAccessException the illegal access exception
+	 * @throws ClassNotFoundException the class not found exception
+	 * @throws IOException 
+	 * @throws UnirestException 
+	 * @throws CloneNotSupportedException 
+	 * @throws JSONException 
+	 */
+	@POST
+	@Path("/getFileDescription")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response getFileDescription(String request) throws InstantiationException, IllegalAccessException, ClassNotFoundException, CloneNotSupportedException, IOException, JSONException{
+
+		System.out.println(request);
+		JSONObject jsonObject = new JSONObject(request);
+
+		String userID = jsonObject.getString("userID");
+		String fileKey = jsonObject.getString("key");
+		
+		//google how to get auth token
+		String authToken = jsonObject.getString("");
+
+		if(userID == null || authToken == null || fileKey == null){
+			System.out.println("=====userID ERROR=====");
+			return Response.status(400).entity("{\"Error\":\"Provide email and token\"}").build();
+		}
+		// match auth token to see it's a logged in user
+		// get bucket name from user
+		// get file description using bucket key and name
+		// return file description as response
+		
+		System.out.println("=====SERVED JSON TO USER=====");
+		return Response.ok().build();
+	}
 	//		/**
 	//		 * Allows users to login with username and password.
 	//		 * @param userName: username
