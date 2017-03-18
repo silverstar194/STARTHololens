@@ -12,7 +12,7 @@ import java.sql.SQLException;
 public class KeyBuilder {
 
 
-	public static byte[] getPubicKey(String id){
+	public static byte[] getPublicKey(String id){
 
 		DataBaseDriver dataBase = new DataBaseDriver();
 		Connection dataBaseConn = null;
@@ -52,7 +52,7 @@ public class KeyBuilder {
 		try {
 			dataBaseConn = dataBase.getConnection();
 
-			String command ="SELECT `sercetKey`.`sercetKey` FROM `user` WHERE userID='"+id+"'";
+			String command ="SELECT `secretKey`.`secretKey` FROM `user` WHERE userID='"+id+"'";
 			ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
 
 			Blob blob = rs.getBlob(1);
