@@ -41,10 +41,78 @@
 //////////////////////////// 80 columns wide //////////////////////////////////
 package database;
 
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * @author Admin
  *
  */
 public class KeySaver {
+
+	public static void savePublicKey(String userID, byte[] publicKey){
+
+		DataBaseDriver dataBase = new DataBaseDriver();
+		Connection dataBaseConn = null;
+		try {
+			dataBaseConn = dataBase.getConnection();
+
+
+			PreparedStatement stmt = dataBaseConn.prepareStatement("INSERT INTO accessKey (userID, accessKey) VALUES (?, ?)");
+			stmt.setString(1, userID);
+
+			Blob blob = dataBaseConn.createBlob();
+			blob.setBytes(2,publicKey);
+
+
+			System.out.println("=====PRIVATE KEY CREATED FROM DATABASE=====");
+
+		} catch (Exception e) {
+			System.out.println("=====ERROR GETTING PRIVATE KEY FROM DATABASE=====");
+			e.printStackTrace();
+		}finally{
+			try {
+				dataBaseConn.close();
+			} catch (SQLException e) {
+				System.out.println("CANNOT CLOSE MYSQL CONNECTION");
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+
+	public static void savePrivateKey(String userID, byte[] secretKey){
+
+		DataBaseDriver dataBase = new DataBaseDriver();
+		Connection dataBaseConn = null;
+		try {
+			dataBaseConn = dataBase.getConnection();
+
+
+			PreparedStatement stmt = dataBaseConn.prepareStatement("INSERT INTO secretKey (userID, secretKey) VALUES (?, ?)");
+			stmt.setString(1, userID);
+
+			Blob blob = dataBaseConn.createBlob();
+			blob.setBytes(2,secretKey);
+
+
+			System.out.println("=====PRIVATE KEY CREATED FROM DATABASE=====");
+
+		} catch (Exception e) {
+			System.out.println("=====ERROR GETTING PRIVATE KEY FROM DATABASE=====");
+			e.printStackTrace();
+		}finally{
+			try {
+				dataBaseConn.close();
+			} catch (SQLException e) {
+				System.out.println("CANNOT CLOSE MYSQL CONNECTION");
+				e.printStackTrace();
+			}
+		}
+
+	}
 
 }
