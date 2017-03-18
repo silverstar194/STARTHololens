@@ -26,5 +26,8 @@
 	<classpathentry kind="lib" path="jsr311-api-1.1.1.jar"/>
 	<classpathentry kind="lib" path="mysql-connector-java-5.1.38-bin.jar"/>
 	<classpathentry kind="lib" path="org.json-20120521.jar"/>
+	<classpathentry kind="lib" path="aws-java-sdk-1.11.105-javadoc.jar"/>
+	<classpathentry kind="lib" path="aws-java-sdk-1.11.105-sources.jar"/>
+	<classpathentry kind="lib" path="aws-java-sdk-1.11.105.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

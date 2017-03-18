@@ -19,14 +19,14 @@ import java.util.Arrays;
 public class KeyManagement {
 	
 	
-	 	public static KeyPair genKeyPair(String algorithm, int bitLength) throws NoSuchAlgorithmException {
+	 	public KeyPair genKeyPair(String algorithm, int bitLength) throws NoSuchAlgorithmException {
 		    SecureRandom srand = new SecureRandom();
 	        KeyPairGenerator keyGenerator = KeyPairGenerator.getInstance(algorithm);
 	        keyGenerator.initialize(1024, srand);
 	        return keyGenerator.generateKeyPair();
 	    }
 
-	    public static void saveKeyPair(String dir, KeyPair keyPair)
+	    public void saveKeyPair(String dir, KeyPair keyPair)
 	            throws IOException {
 	        PrivateKey privateKey = keyPair.getPrivate();
 	        PublicKey publicKey = keyPair.getPublic();
@@ -42,7 +42,7 @@ public class KeyManagement {
 	        // write pkcs8EncodedKeySpec.getEncoded() to database
 	    }
 
-	    public static KeyPair loadKeyPair(String path, String algorithm)
+	    public KeyPair loadKeyPair(int userId, String algorithm)
 	            throws IOException, NoSuchAlgorithmException,
 	            InvalidKeySpecException {
 	        // read public key from DB
