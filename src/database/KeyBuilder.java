@@ -20,7 +20,9 @@ public class KeyBuilder {
 		try {
 			dataBaseConn = dataBase.getConnection();
 
-			String command ="SELECT `accessKey`.`accessKey` FROM `user` WHERE userID='"+id+"'";
+			String command ="SELECT `accessKey` FROM `accessKey` WHERE userID='"+id+"'";
+			
+			System.out.println(command);
 			ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
 
 			Blob blob = rs.getBlob(1);
@@ -52,7 +54,7 @@ public class KeyBuilder {
 		try {
 			dataBaseConn = dataBase.getConnection();
 
-			String command ="SELECT `secretKey`.`secretKey` FROM `user` WHERE userID='"+id+"'";
+			String command ="SELECT `secretKey` FROM `secretKey` WHERE userID='"+id+"'";
 			ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
 
 			Blob blob = rs.getBlob(1);

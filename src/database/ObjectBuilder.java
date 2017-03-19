@@ -53,15 +53,8 @@ import user.User;
  */
 public class ObjectBuilder {
 
-	private final String id;
 
-
-	public ObjectBuilder(String id){
-		this.id = id;
-	}
-
-
-	public User getUser() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public User getUser(String userID) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		DataBaseDriver dataBase = new DataBaseDriver();
 		Connection dataBaseConn = dataBase.getConnection();
 		User exportUser = null;
@@ -69,12 +62,12 @@ public class ObjectBuilder {
 			dataBaseConn = dataBase.getConnection();
 
 
-			String command ="SELECT * FROM `user` WHERE userID='"+this.id+"'";
+			String command ="SELECT * FROM `user` WHERE userID='"+userID+"'";
 
 			System.out.println(command);
 			ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
 			while(rs.next()){
-				exportUser = new User(rs.getString("passHash"),"PLACEHOLDER", this.id);
+				exportUser = new User(rs.getString("passHash"),"PLACEHOLDER", rs.getString("userID"));
 			}
 
 			System.out.println("=====USER CREATED FROM DATABASE=====");

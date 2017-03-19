@@ -45,6 +45,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.amazonaws.services.s3.model.Bucket;
+
 import user.User;
 
 /**
@@ -53,21 +55,15 @@ import user.User;
  */
 public class ObjectSaver {
 
-	private User user;
 
-	public ObjectSaver(User user){
-		this.user = user;
-	}
-
-
-	public void saveUser() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public static void saveUser(User user) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 		DataBaseDriver dataBase = new DataBaseDriver();
 		Connection dataBaseConn = dataBase.getConnection();
 
 		try {
 			dataBaseConn = dataBase.getConnection();
 
-			String command = "INSERT `"+Config.dbName+"`.`user` SET `userID` = '"+user.getUserID()+
+			String command = "INSERT INTO `"+Config.dbName+"`.`user` SET `userID` = '"+user.getUserID()+
 					"', `passHash` = '"+user.getpassword()+"', `salt` = '"+user.getUserID()+
 					"', `emailPin` = '"+user.getEmailPin()+"'";
 
@@ -78,6 +74,36 @@ public class ObjectSaver {
 
 		} catch (Exception e) {
 			System.out.println("=====ERROR SAVING USER FROM DATABASE=====");
+			e.printStackTrace();
+		}finally{
+			try {
+				dataBaseConn.close();
+			} catch (SQLException e) {
+				System.out.println("CANNOT CLOSE MYSQL CONNECTION");
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+
+
+	public static void saveBucketID(String bucketName, String userID) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+		DataBaseDriver dataBase = new DataBaseDriver();
+		Connection dataBaseConn = dataBase.getConnection();
+
+		try {
+			dataBaseConn = dataBase.getConnection();
+
+			String command = "INSERT INTO `"+Config.dbName+"`.`bucketID` SET `userID` = '"+userID+
+					"', `bucketName` = '"+bucketName+"';";
+
+			dataBase.executeUpdate(dataBaseConn, command);
+
+			System.out.println("=====USER SAVE TO DATABASE=====");
+
+		} catch (Exception e) {
+			System.out.println("=====ERROR SAVING BUCKETID FROM DATABASE=====");
 			e.printStackTrace();
 		}finally{
 			try {

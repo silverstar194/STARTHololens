@@ -69,12 +69,6 @@ public class User {
 		System.out.println("=====Generated New User=====");
 	}
 
-	public User(String userID){
-
-		///get and create a user here
-	}
-
-
 	/**
 	 * Gets the email.
 	 *

@@ -41,6 +41,8 @@
 //////////////////////////// 80 columns wide //////////////////////////////////
 package database;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -60,17 +62,17 @@ public class KeySaver {
 			dataBaseConn = dataBase.getConnection();
 
 
-			PreparedStatement stmt = dataBaseConn.prepareStatement("INSERT INTO accessKey (userID, accessKey) VALUES (?, ?)");
+			PreparedStatement stmt = dataBaseConn.prepareStatement("INSERT INTO accessKey (userID, accessKey) VALUES (?,?)");
 			stmt.setString(1, userID);
+			stmt.setBinaryStream(2,new ByteArrayInputStream(publicKey),publicKey.length);
+			stmt.execute();
 
-			Blob blob = dataBaseConn.createBlob();
-			blob.setBytes(2,publicKey);
-
-
+			System.out.println("Pub. Key: "+publicKey);
+			System.out.println("SQL:"+stmt);
 			System.out.println("=====PRIVATE KEY CREATED FROM DATABASE=====");
 
 		} catch (Exception e) {
-			System.out.println("=====ERROR GETTING PRIVATE KEY FROM DATABASE=====");
+			System.out.println("=====ERROR SAVING PRIVATE KEY TO DATABASE=====");
 			e.printStackTrace();
 		}finally{
 			try {
@@ -94,12 +96,13 @@ public class KeySaver {
 
 			PreparedStatement stmt = dataBaseConn.prepareStatement("INSERT INTO secretKey (userID, secretKey) VALUES (?, ?)");
 			stmt.setString(1, userID);
+			stmt.setBinaryStream(2,new ByteArrayInputStream(secretKey),secretKey.length);
+			
+	
 
-			Blob blob = dataBaseConn.createBlob();
-			blob.setBytes(2,secretKey);
+			stmt.execute();
 
-
-			System.out.println("=====PRIVATE KEY CREATED FROM DATABASE=====");
+			System.out.println("=====PRIVATE KEY CREATED FOR DATABASE=====");
 
 		} catch (Exception e) {
 			System.out.println("=====ERROR GETTING PRIVATE KEY FROM DATABASE=====");

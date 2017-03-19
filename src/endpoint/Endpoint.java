@@ -4,6 +4,8 @@ import java.util.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import javax.imageio.ImageIO;
 import javax.ws.rs.Consumes;
@@ -20,6 +22,9 @@ import org.json.JSONObject;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 
+import amazon.AmazonClient;
+import amazon.AmazonConfig;
+import amazon.KeyManagement;
 import database.ObjectBuilder;
 import database.ObjectSaver;
 import user.User;
@@ -37,6 +42,9 @@ import  javax.ws.rs.QueryParam;
  */
 @Path("/")
 public class Endpoint {
+	
+	private final AmazonClient amazonClient = new AmazonClient();
+	private final KeyManagement keyManagement = new KeyManagement();
 
 	/**
 	 * Hello. "Hello World!" for Halo API
@@ -122,7 +130,7 @@ public class Endpoint {
 			return Response.status(400).entity("{\"Error\":\"Provide email and password\"}").build();
 		}
 
-		User user = new ObjectBuilder(userID).getUser();
+		User user = new ObjectBuilder().getUser(userID);
 
 		//no user
 		if(user == null){
@@ -154,11 +162,12 @@ public class Endpoint {
 	 * @throws UnirestException 
 	 * @throws CloneNotSupportedException 
 	 * @throws JSONException 
+	 * @throws NoSuchAlgorithmException 
 	 */
 	@POST
 	@Path("/newuser")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response newUser(String request) throws InstantiationException, IllegalAccessException, ClassNotFoundException, CloneNotSupportedException, IOException, JSONException{
+	public Response newUser(String request) throws InstantiationException, IllegalAccessException, ClassNotFoundException, CloneNotSupportedException, IOException, JSONException, NoSuchAlgorithmException{
 
 		JSONObject jsonObject = new JSONObject(request);
 
@@ -170,9 +179,16 @@ public class Endpoint {
 		}
 		try{
 
-			new ObjectSaver(new User(password,"placeholder pin" ,userID)).saveUser();
-			// create data keys and store
-			// create bucket and store
+			User user = new User(password,"placeholder pin" ,userID);
+			ObjectSaver.saveUser(user);
+			KeyPair keyPair = keyManagement.genKeyPair(AmazonConfig.ENCRYPTION_ALGORITHM, AmazonConfig.ENCRYPTION_BIT_LENGTH);
+//			System.out.println(keyPair);
+//			System.out.println(keyPair.getPrivate());
+//			System.out.println(keyPair.getPublic());
+//			System.exit(1);
+			keyManagement.saveKeyPair(user.getUserID(), keyPair);
+			amazonClient.createBucket(user.getUserID());
+			
 			System.out.println("=====SERVED JSON TO USER=====");
 			return Response.status(200).entity("{\"Message\":\"User Added to Database\", \"userID\":\""+userID+"\"}").build();
 
