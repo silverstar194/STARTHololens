@@ -10,13 +10,16 @@
     <welcome-file>default.jsp</welcome-file>
     <welcome-file>/axis2-web/index.jsp</welcome-file>
   </welcome-file-list>
-  <servlet>
-    <servlet-name>Loop</servlet-name>
-    <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>Loop</servlet-name>
-    <url-pattern>/api/*</url-pattern>
-  </servlet-mapping>
+    <servlet>
+        <servlet-name>Loop</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Loop</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
 </web-app>
+
+
+    

@@ -17,6 +17,16 @@
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-jaxrs-1.9.2.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-mapper-asl-1.9.2.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-xc-1.9.2.jar"/>
+	<classpathentry kind="lib" path="commons-io-2.5.jar"/>
+	<classpathentry kind="lib" path="commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="jackson-core-2.9.0.pr1.jar"/>
+	<classpathentry kind="lib" path="jackson-annotations-2.8.1.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-annotations-2.8.1.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-core-2.9.0.pr1.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-databind-2.9.0.pr1.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jettison-1.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/Admin/Downloads/Templates/jackson-databind-2.9.0.pr1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
